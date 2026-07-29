@@ -1,0 +1,70 @@
+{
+  "sourceUrl": "https://www.samsunghospital.com/home/info/guide/hmain.do",
+  "sourcePageRule": "Only the current in-hospital guide page was used. Legacy guide-detail HTML pages are intentionally excluded.",
+  "mapImagePathFromSource": "/_newhome/ui/home/static/img/info/guide/map/map_hmain_01.png?ver=21",
+  "building": "본관",
+  "floor": "1F",
+  "coordinateSystem": {
+    "width": 945,
+    "height": 701,
+    "unit": "px",
+    "note": "Coordinates use the latest hmain.do 본관 1층 active POI data-left/data-top values. Items with data-left2/data-top2 keep their secondary marker in alternatePositions."
+  },
+  "pois": [
+    { "id": "main-1f-cdc", "deptNo": 64, "name": "감염병센터(CDC)", "category": "clinic", "categoryColor": "clinic", "x": 427, "y": 606 },
+    { "id": "main-1f-internal-medicine", "deptNo": 2, "name": "내과", "category": "clinic", "categoryColor": "clinic", "x": 220, "y": 93 },
+    { "id": "main-1f-diabetes-test", "deptNo": 85, "name": "당뇨검사실", "category": "exam", "categoryColor": "exam", "x": 347, "y": 497 },
+    { "id": "main-1f-diabetes-education", "deptNo": 80, "name": "당뇨교육실", "category": "clinic", "categoryColor": "clinic", "x": 311, "y": 497 },
+    { "id": "main-1f-diabetes-center", "deptNo": 6, "name": "당뇨병센터 안내데스크", "category": "clinic", "categoryColor": "clinic", "x": 421, "y": 520 },
+    { "id": "main-1f-xray", "deptNo": 65, "name": "방사선 검사실(X-ray)", "category": "exam", "categoryColor": "exam", "x": 588, "y": 142 },
+    { "id": "main-1f-gypsum", "deptNo": 68, "name": "석고실", "category": "clinic", "categoryColor": "clinic", "x": 322, "y": -28 },
+    { "id": "main-1f-sports-medicine", "deptNo": 4, "name": "스포츠의학실", "category": "clinic", "categoryColor": "clinic", "x": 363, "y": 133 },
+    {
+      "id": "main-1f-information",
+      "deptNo": 75,
+      "name": "안내(Information)",
+      "category": "service",
+      "categoryColor": "service",
+      "x": 316,
+      "y": 360,
+      "alternatePositions": [{ "x": 845, "y": 341 }]
+    },
+    { "id": "main-1f-imaging-operation", "deptNo": 95, "name": "영상의학실", "category": "exam", "categoryColor": "exam", "x": 499, "y": -11 },
+    { "id": "main-1f-outpatient-pharmacy", "deptNo": 77, "name": "외래약국", "category": "pharmacy", "categoryColor": "pharmacy", "x": 480, "y": 81 },
+    { "id": "main-1f-outpatient-treatment", "deptNo": 78, "name": "외래치료실", "category": "clinic", "categoryColor": "clinic", "x": 500, "y": 167 },
+    { "id": "main-1f-payment-1", "deptNo": 79, "name": "무인수납1", "category": "service", "categoryColor": "service", "x": 428, "y": 481 },
+    { "id": "main-1f-payment-2", "deptNo": 99, "name": "무인수납2", "category": "service", "categoryColor": "service", "x": 364, "y": 196 },
+    { "id": "main-1f-negative-pressure-ward", "deptNo": 80, "name": "음압병동", "category": "ward", "categoryColor": "ward", "x": 873, "y": 460 },
+    { "id": "main-1f-emergency", "deptNo": 26, "name": "응급실", "category": "emergency", "categoryColor": "emergency", "x": 721, "y": 460 },
+    { "id": "main-1f-medical-record-copy", "deptNo": 84, "name": "서류발급/영상복사", "category": "service", "categoryColor": "service", "x": 189, "y": 369 },
+    { "id": "main-1f-transplant-center", "deptNo": 98, "name": "장기이식센터", "category": "clinic", "categoryColor": "clinic", "x": 219, "y": -4 },
+    { "id": "main-1f-orthopedic-spine", "deptNo": 30, "name": "정형외과 | 척추센터", "category": "clinic", "categoryColor": "clinic", "x": 364, "y": 70 },
+    { "id": "main-1f-first-visit-counseling", "deptNo": 93, "name": "초진진료상담", "category": "service", "categoryColor": "service", "x": 254, "y": 509 },
+    { "id": "main-1f-cafe-artisee", "deptNo": 86, "name": "카페 아티제", "category": "convenience", "categoryColor": "convenience", "x": 473, "y": 373 },
+    { "id": "main-1f-fluoroscopy", "deptNo": 87, "name": "투시 검사실", "category": "exam", "categoryColor": "exam", "x": 673, "y": 136 },
+    {
+      "id": "main-1f-angiography",
+      "deptNo": 17,
+      "name": "혈관 조영실",
+      "category": "exam",
+      "categoryColor": "exam",
+      "x": 673,
+      "y": 214,
+      "alternatePositions": [{ "x": 814, "y": 53 }]
+    },
+    { "id": "main-1f-blood-glucose", "deptNo": 89, "name": "내당능검사실", "category": "exam", "categoryColor": "exam", "x": 225, "y": 515 },
+    { "id": "main-1f-referral-partners", "deptNo": 92, "name": "전원상담/파트너센터", "category": "service", "categoryColor": "service", "x": 200, "y": 421 },
+    {
+      "id": "main-1f-ct",
+      "deptNo": 90,
+      "name": "CT 검사실",
+      "category": "exam",
+      "categoryColor": "exam",
+      "x": 672,
+      "y": 57,
+      "alternatePositions": [{ "x": 756, "y": 190 }]
+    },
+    { "id": "main-1f-mri", "deptNo": 91, "name": "MRI실", "category": "exam", "categoryColor": "exam", "x": 871, "y": 192 },
+    { "id": "main-1f-smc-senior-lounge", "deptNo": 81, "name": "SMC 시니어 라운지", "category": "convenience", "categoryColor": "convenience", "x": 311, "y": 477 }
+  ]
+}

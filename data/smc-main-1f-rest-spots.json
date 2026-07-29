@@ -1,0 +1,36 @@
+[
+  {
+    "id": "main-1f-rest-001",
+    "name": "내과 화장실 옆 휴게공간",
+    "x": null,
+    "y": null,
+    "category": "rest",
+    "categoryColor": "rest",
+    "description": "긴 대기 동선에서 잠시 쉬기 좋은 의자 구역입니다.",
+    "photoUrl": "/images/rest-spots/본관-1층-내과-화장실-옆-휴게공간.jpg",
+    "tags": ["벤치", "콘센트 있음", "조용함"],
+    "building": "본관",
+    "floor": "1층",
+    "seatCount": 4,
+    "hasOutlet": true,
+    "isQuiet": true,
+    "mapImage": "/images/maps/본관-1층.jpg"
+  },
+  {
+    "id": "main-1f-rest-002",
+    "name": "로비 창가 잠깐 쉼터",
+    "x": null,
+    "y": null,
+    "category": "rest",
+    "categoryColor": "rest",
+    "description": "향후 좌표를 채워 넣을 예정인 휴식 공간 예시입니다.",
+    "photoUrl": "/images/rest-spots/placeholder-main-1f-rest-002.jpg",
+    "tags": ["창가", "대기"],
+    "building": "본관",
+    "floor": "1층",
+    "seatCount": 2,
+    "hasOutlet": false,
+    "isQuiet": true,
+    "mapImage": "/images/maps/본관-1층.jpg"
+  }
+]
