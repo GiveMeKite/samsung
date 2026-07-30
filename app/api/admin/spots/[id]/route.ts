@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { deleteRestSpot, getRestSpotMapImage, getSpotById, readRestSpots, saveRestSpotImage, upsertRestSpot } from '@/lib/rest-spot-store';
 import { isAdminRequest } from '@/lib/admin-auth';
-import { RestSpot } from '@/types/chair';
+import {
+  BackrestStatus,
+  RestSpot,
+  WheelchairAccessStatus,
+  inferBackrestStatusFromTags,
+  inferWheelchairAccessStatusFromTags,
+} from '@/types/chair';
 
 export const runtime = 'nodejs';
 
@@ -20,6 +26,16 @@ function parseTags(value: FormDataEntryValue | null) {
   return value.split(',').map((tag) => tag.trim()).filter(Boolean);
 }
 
+function parseBackrestStatus(value: FormDataEntryValue | null): BackrestStatus | null {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  return value === 'yes' || value === 'no' || value === 'unknown' ? value : 'unknown';
+}
+
+function parseWheelchairAccessStatus(value: FormDataEntryValue | null): WheelchairAccessStatus | null {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  return value === 'accessible' || value === 'difficult' || value === 'unknown' ? value : 'unknown';
+}
+
 async function buildSpotFromForm(id: string, formData: FormData) {
   const current = await getSpotById(id);
   if (!current) return null;
@@ -33,8 +49,11 @@ async function buildSpotFromForm(id: string, formData: FormData) {
   const pinY = parseNumber(formData.get('pinY'));
   const seatCount = parseNumber(formData.get('seatCount'));
   const hasOutlet = parseBoolean(formData.get('hasOutlet'));
+  const hasTable = parseBoolean(formData.get('hasTable'));
   const isQuiet = parseBoolean(formData.get('isQuiet'));
   const tags = parseTags(formData.get('tags'));
+  const backrestStatus = parseBackrestStatus(formData.get('backrestStatus'));
+  const wheelchairAccessStatus = parseWheelchairAccessStatus(formData.get('wheelchairAccessStatus'));
   const file = formData.get('photo');
 
   const mapImage = getRestSpotMapImage(building, floor, allSpots) ?? current.mapImage;
@@ -50,6 +69,9 @@ async function buildSpotFromForm(id: string, formData: FormData) {
     building,
     floor,
     mapImage,
+    backrestStatus: backrestStatus ?? current.backrestStatus ?? inferBackrestStatusFromTags(tags.length ? tags : current.tags),
+    wheelchairAccessStatus:
+      wheelchairAccessStatus ?? current.wheelchairAccessStatus ?? inferWheelchairAccessStatusFromTags(tags.length ? tags : current.tags),
     pin: {
       x: typeof pinX === 'number' ? Math.round(pinX * 10) / 10 : current.pin.x,
       y: typeof pinY === 'number' ? Math.round(pinY * 10) / 10 : current.pin.y,
@@ -59,6 +81,7 @@ async function buildSpotFromForm(id: string, formData: FormData) {
     photoPath,
     seatCount,
     hasOutlet,
+    hasTable,
     isQuiet,
     tags,
   } satisfies RestSpot;
@@ -91,5 +114,5 @@ export async function DELETE(request: Request, context: { params: { id: string }
     return NextResponse.json({ error: '삭제할 대상을 찾지 못했습니다.' }, { status: 404 });
   }
 
-  return NextResponse.json({ deleted: true });
+  return NextResponse.json({ success: true });
 }

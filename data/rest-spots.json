@@ -1,87 +1,5 @@
 [
   {
-    "id": "main-1f-001",
-    "building": "본관",
-    "floor": "1층",
-    "mapImage": "/images/maps/본관-1층.jpg",
-    "pin": {
-      "x": 31,
-      "y": 40
-    },
-    "areaName": "내과 화장실 옆 휴게공간",
-    "description": "긴 벤치가 있고 대기 인파가 적은 편입니다. 출입문 동선만 조금 주의하세요.",
-    "photoPath": "/images/rest-spots/본관-1층-내과-화장실-옆-휴게공간.jpg",
-    "seatCount": 4,
-    "hasOutlet": true,
-    "isQuiet": true,
-    "tags": [
-      "벤치",
-      "콘센트 있음",
-      "조용함"
-    ]
-  },
-  {
-    "id": "main-2f-001",
-    "building": "본관",
-    "floor": "2층",
-    "mapImage": "/images/maps/본관-2층.jpg",
-    "pin": {
-      "x": 65,
-      "y": 35
-    },
-    "areaName": "진료실 앞 대기공간",
-    "description": "창가 쪽에 앉을 수 있는 자리와 콘센트가 있습니다.",
-    "photoPath": "/images/rest-spots/본관-2층-진료실-앞-앉아서-쉬기-좋음-콘센트-있음.jpg",
-    "seatCount": 4,
-    "hasOutlet": true,
-    "isQuiet": true,
-    "tags": [
-      "콘센트 있음",
-      "조용함",
-      "대기공간"
-    ]
-  },
-  {
-    "id": "main-b1-001",
-    "building": "본관",
-    "floor": "지하1층",
-    "mapImage": "/images/maps/본관-지하1층.jpg",
-    "pin": {
-      "x": 50,
-      "y": 58
-    },
-    "areaName": "종교실 옆 조용한 휴게공간",
-    "description": "사람이 적고 잠시 앉아 있기 좋은 공간입니다.",
-    "photoPath": "/images/rest-spots/본관-지하1층-종교실.jpg",
-    "seatCount": 2,
-    "hasOutlet": false,
-    "isQuiet": true,
-    "tags": [
-      "조용함",
-      "독서 가능"
-    ]
-  },
-  {
-    "id": "main-b2-001",
-    "building": "본관",
-    "floor": "지하2층",
-    "mapImage": "/images/maps/본관-지하2층.jpg",
-    "pin": {
-      "x": 42,
-      "y": 60
-    },
-    "areaName": "주차장 앞 휴게공간",
-    "description": "휠체어 보관 공간과 가까워 이동 동선 확인이 필요합니다.",
-    "photoPath": "/images/rest-spots/본관-지하2층-주차장-앞-휴게공간.jpg",
-    "seatCount": 3,
-    "hasOutlet": false,
-    "isQuiet": false,
-    "tags": [
-      "주차장 인접",
-      "이동 동선"
-    ]
-  },
-  {
     "id": "annex-2f-001",
     "building": "별관",
     "floor": "2층",
@@ -123,20 +41,251 @@
     ]
   },
   {
-    "id": "main-1f-002",
+    "id": "main-b2-003",
     "building": "본관",
-    "floor": "1층",
-    "mapImage": "/images/maps/본관-1층.jpg",
+    "floor": "지하2층",
+    "mapImage": "/maps/smc-main-b2.png",
     "pin": {
-      "x": 53.7,
-      "y": 40.6
+      "x": 45.1,
+      "y": 15.3
     },
-    "areaName": "정수기",
-    "description": "정수기가 있습니당",
-    "photoPath": "/images/rest-spots/본관-1층-1785330849107-외래약국-옆-정수기.jpg",
-    "seatCount": null,
+    "areaName": "본관 지하2층 의자, 휠체어 보관소",
+    "description": "의자 옆에 휠체어를 보관할 수 있는 공간이 있고 의자 사이에 팔걸이가 있어서 편하게 앉아서 기다릴 수 있습니다. 주차장 입구 쪽이라 차량과의 접근성도 좋습니다.",
+    "photoPath": "/images/rest-spots/본관-지하2층-1785385969923-주차장-앞-휴게공간-휠체어-보관.jpg",
+    "seatCount": 3,
     "hasOutlet": false,
     "isQuiet": false,
-    "tags": []
+    "tags": [
+      "#팔걸이",
+      "#휠체어보관가능",
+      "#주차장근처"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-b2-004",
+    "building": "본관",
+    "floor": "지하2층",
+    "mapImage": "/maps/smc-main-b2.png",
+    "pin": {
+      "x": 53.4,
+      "y": 26.9
+    },
+    "areaName": "본관 지하2층 주차장 앞 휴게공간과 자판기",
+    "description": "콘센트가 있어 충전이 가능하고 바로 앞에 자판기가 있어서 쉬면서 음료수를 마실 수 있는 공간입니다. 주차장 입구 쪽이라 차량과의 접근성도 좋습니다.",
+    "photoPath": "/images/rest-spots/본관-지하2층-1785386015616-주차장-앞-휴게공간-1.jpg",
+    "seatCount": 3,
+    "hasOutlet": true,
+    "isQuiet": false,
+    "tags": [
+      "#자판기근처",
+      "#콘센트",
+      "#주차장근처"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-b1-001",
+    "building": "본관",
+    "floor": "지하1층",
+    "mapImage": "/maps/smc-main-b1.png",
+    "pin": {
+      "x": 46.3,
+      "y": 7.6
+    },
+    "areaName": "본관 지하1층 주차정산기",
+    "description": "지하주차장과 건물의 연결 구간에는 2개의 주차정산기가 있습니다. 베리어프리 기기도 준비되어 있어 편안하게 이용 가능합니다.",
+    "photoPath": "/images/rest-spots/본관-지하1층-1785386361030-주차정산.jpg",
+    "seatCount": 0,
+    "hasOutlet": false,
+    "isQuiet": false,
+    "tags": [
+      "#주차정산",
+      "#접근하기 쉬워요"
+    ],
+    "backrestStatus": "no",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-2f-002",
+    "building": "본관",
+    "floor": "2층",
+    "mapImage": "/maps/smc-main-2f.png",
+    "pin": {
+      "x": 37.1,
+      "y": 3.4
+    },
+    "areaName": "본관 2층 검사실 바깥쪽 통로",
+    "description": "검사실 바깥에 위치한 넓고 쾌적한 통로입니다. 의자는 없지만 콘센트를 이용할 수 있으며, 가볍게 걷거나 잠시 머물기에 적합합니다. 창밖으로 롯데타워가 보이는 탁 트인 전망도 감상할 수 있습니다.",
+    "photoPath": "/images/rest-spots/본관-2층-1785386774380-걷기좋은-곳.jpg",
+    "seatCount": 0,
+    "hasOutlet": true,
+    "isQuiet": true,
+    "tags": [
+      "#산책 #전망 #롯데타워 #콘센트 #통로"
+    ],
+    "backrestStatus": "no",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-2f-003",
+    "building": "본관",
+    "floor": "2층",
+    "mapImage": "/maps/smc-main-2f.png",
+    "pin": {
+      "x": 7.1,
+      "y": 39.1
+    },
+    "areaName": "본관 2층 뇌신경센터 옆 쉼터",
+    "description": "뇌신경센터 옆에 위치한 소규모 휴식 공간입니다. 약 5석의 좌석과 콘센트 2개가 마련되어 있으며, 화장실과 물품보관함이 가까워 이용이 편리합니다. 비교적 조용한 분위기에서 잠시 쉬거나 휴대기기를 충전하기에 적합합니다.",
+    "photoPath": "/images/rest-spots/본관-2층-1785386853779-화장실-앞-콘센트-2개-조용함.jpg",
+    "seatCount": 5,
+    "hasOutlet": true,
+    "isQuiet": true,
+    "tags": [
+      "#조용한공간 #콘센트 #물품보관함 #화장실인접 #휴식"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-b1-002",
+    "building": "본관",
+    "floor": "지하1층",
+    "mapImage": "/maps/smc-main-b1.png",
+    "pin": {
+      "x": 21.7,
+      "y": 53.3
+    },
+    "areaName": "본관 지하1층 대강당 앞 휴게공간",
+    "description": "대강당 앞 휴게공간에는 약 4석의 좌석이 마련되어 있으며, 콘센트도 구비되어 있어 편리하게 이용할 수 있습니다. 노트북을 하며 혼자 시간을 보내기 좋습니다.",
+    "photoPath": "/images/rest-spots/본관-지하1층-1785387045399-대강당-앞-휴식공간-1번.png",
+    "seatCount": 4,
+    "hasOutlet": true,
+    "isQuiet": true,
+    "tags": [
+      "#노트북",
+      "#조용함",
+      "#콘센트"
+    ],
+    "backrestStatus": "no",
+    "wheelchairAccessStatus": "accessible",
+    "hasTable": true,
+    "hasWheelchairParking": true
+  },
+  {
+    "id": "main-2f-004",
+    "building": "본관",
+    "floor": "2층",
+    "mapImage": "/maps/smc-main-2f.png",
+    "pin": {
+      "x": 15.7,
+      "y": 48.2
+    },
+    "areaName": "본관 2층 엘리베이터 앞 휴식처",
+    "description": "엘리베이터 바로 앞에 위치한 휴식 공간으로, 약 5석의 좌석과 콘센트를 이용할 수 있습니다. 접근성은 뛰어나지만 오가는 사람이 많아 다소 붐빌 수 있으며, 좌석이 자주 만석인 편입니다.",
+    "photoPath": "/images/rest-spots/본관-2층-1785387236160-본관-2층-3번.png",
+    "seatCount": 5,
+    "hasOutlet": true,
+    "isQuiet": false,
+    "tags": [
+      "#엘리베이터앞 #접근성 #콘센트 #대기공간 #붐빔"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-2f-005",
+    "building": "본관",
+    "floor": "2층",
+    "mapImage": "/maps/smc-main-2f.png",
+    "pin": {
+      "x": 18.5,
+      "y": 20.1
+    },
+    "areaName": "본관 2층  뇌신경센터 앞 대기공간",
+    "description": "뇌신경센터 진료실 앞에 위치한 대기 공간으로, 진료를 기다리며 잠시 앉아 쉬기 좋은 공간입니다. 약 20석의 좌석이 마련되어 있으며 콘센트를 이용할 수 있어 휴대기기 사용도 편리합니다.",
+    "photoPath": "/images/rest-spots/본관-2층-1785387432767-본관-2층-1번-ai.png",
+    "seatCount": 20,
+    "hasOutlet": true,
+    "isQuiet": false,
+    "tags": [
+      "#진료대기 #휴식공간 #콘센트 #대기공간"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-1f-003",
+    "building": "본관",
+    "floor": "1층",
+    "mapImage": "/maps/smc-main-1f.png",
+    "pin": {
+      "x": 34.4,
+      "y": 12.2
+    },
+    "areaName": "본관 1층 장기이식센터 앞 별하재 벽면 휴게공간",
+    "description": "팔걸이가 있는 단단한 목재 의자가 배치된 휴게 공간입니다. 등받이는 없지만 벽면에 기대어 휴식할 수 있으며, 공간이 다소 협소하여 장시간 이용보다는 잠시 쉬어가기 적합합니다.",
+    "photoPath": "/images/rest-spots/본관-1층-1785392090083-3번.png",
+    "seatCount": 4,
+    "hasOutlet": false,
+    "isQuiet": true,
+    "tags": [
+      "#목재의자 #팔걸이 #잠시휴식 #협소"
+    ],
+    "backrestStatus": "no",
+    "wheelchairAccessStatus": "difficult"
+  },
+  {
+    "id": "main-1f-004",
+    "building": "본관",
+    "floor": "1층",
+    "mapImage": "/maps/smc-main-1f.png",
+    "pin": {
+      "x": 48.6,
+      "y": 28.3
+    },
+    "areaName": "본관 1층 메인 대기 휴게공간",
+    "description": "약 40석의 편안한 의자가 마련된 휴게 공간입니다. 전자기기 충전을 위한 콘센트 4개와 정수기가 비치되어 있으며, 이용객이 많은 시간대에는 다소 소음이 있을 수 있습니다.",
+    "photoPath": "/images/rest-spots/본관-1층-1785394542738-4번.png",
+    "seatCount": 40,
+    "hasOutlet": true,
+    "isQuiet": false,
+    "tags": [
+      "#대기공간",
+      "#정수기",
+      "#콘센트",
+      "#많은좌석",
+      "#혼잡가능"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
+  },
+  {
+    "id": "main-1f-005",
+    "building": "본관",
+    "floor": "1층",
+    "mapImage": "/maps/smc-main-1f.png",
+    "pin": {
+      "x": 27,
+      "y": 47.9
+    },
+    "areaName": "본관 1층 화장실 앞 휴게공간",
+    "description": "화장실 인근에 위치한 소규모 휴게 공간입니다. 의자 4석과 콘센트 4개가 마련되어 있으며, 정수기와 물품보관함을 가까이에서 이용할 수 있어 이동 중 잠시 쉬어가기 편리합니다.",
+    "photoPath": "/images/rest-spots/본관-1층-1785394592839-내과-화장실-옆-휴게공간-2번.jpg",
+    "seatCount": 4,
+    "hasOutlet": true,
+    "isQuiet": true,
+    "tags": [
+      "#화장실근처",
+      "#정수기",
+      "#물품보관함",
+      "#콘센트",
+      "#소규모"
+    ],
+    "backrestStatus": "yes",
+    "wheelchairAccessStatus": "accessible"
   }
 ]

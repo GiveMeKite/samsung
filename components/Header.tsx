@@ -12,14 +12,18 @@ export default function Header({ active, onNavigate }: { active: string; onNavig
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="container flex h-[74px] items-center justify-between gap-4">
-        <button onClick={() => onNavigate('home')} className="flex items-center gap-3 text-left" aria-label="홈으로 이동">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#1668c7] text-white">
-            <span className="text-sm font-black">SMC</span>
+      <div className="container flex min-h-[64px] flex-wrap items-center justify-between gap-3 py-3 md:min-h-[74px] md:flex-nowrap md:py-0">
+        <button
+          onClick={() => onNavigate('home')}
+          className="flex min-w-0 items-center gap-3 text-left"
+          aria-label="홈으로 이동"
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#1668c7] text-white md:h-10 md:w-10">
+            <span className="text-[11px] font-black md:text-sm">SMC</span>
           </span>
-          <span>
-            <span className="block text-[11px] font-bold tracking-[.14em] text-[#0d9c9a]">SMC REST SPOT</span>
-            <span className="block text-lg font-extrabold tracking-tight">숨은 의자 찾기</span>
+          <span className="min-w-0">
+            <span className="block text-[10px] font-bold tracking-[.14em] text-[#0d9c9a] sm:text-[11px]">SMC REST SPOT</span>
+            <span className="block text-base font-extrabold tracking-tight sm:text-lg">숨은 의자 찾기</span>
           </span>
         </button>
 
@@ -35,14 +39,14 @@ export default function Header({ active, onNavigate }: { active: string; onNavig
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button onClick={() => onNavigate('list')} aria-label="의자 검색" className="rounded-full p-2 text-slate-600 hover:bg-slate-100">
             <Search size={20} />
           </button>
           <button
             onClick={() => window.location.assign('/admin')}
             aria-label="관리자 모드"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-slate-800"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-slate-800 sm:px-4"
           >
             <Shield size={16} />
             <span className="hidden sm:inline">관리자</span>

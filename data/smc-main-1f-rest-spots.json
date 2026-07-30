@@ -14,7 +14,7 @@
     "seatCount": 4,
     "hasOutlet": true,
     "isQuiet": true,
-    "mapImage": "/images/maps/본관-1층.jpg"
+    "mapImage": "/maps/smc-main-1f.png"
   },
   {
     "id": "main-1f-rest-002",
@@ -31,6 +31,6 @@
     "seatCount": 2,
     "hasOutlet": false,
     "isQuiet": true,
-    "mapImage": "/images/maps/본관-1층.jpg"
+    "mapImage": "/maps/smc-main-1f.png"
   }
 ]

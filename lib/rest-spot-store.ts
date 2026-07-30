@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { RestSpot } from '@/types/chair';
+import { createHospitalMapOptions, getHospitalMapImage, normalizeHospitalFloor } from '@/lib/hospital-maps';
 
 const DATA_PATH = path.join(process.cwd(), 'data', 'rest-spots.json');
 const REST_SPOT_DIR = path.join(process.cwd(), 'public', 'images', 'rest-spots');
@@ -41,19 +42,12 @@ export function sanitizeTags(tags: string[]) {
 }
 
 export function createMapOptions(spots: RestSpot[]) {
-  const options = new Map<string, { building: string; floor: string; mapImage: string }>();
-  for (const spot of spots) {
-    const key = `${spot.building}::${spot.floor}`;
-    if (!options.has(key)) {
-      options.set(key, { building: spot.building, floor: spot.floor, mapImage: spot.mapImage });
-    }
-  }
-  return Array.from(options.values());
+  return createHospitalMapOptions(spots);
 }
 
 export async function readRestSpots() {
   const raw = await fs.readFile(DATA_PATH, 'utf8');
-  return JSON.parse(raw) as RestSpot[];
+  return JSON.parse(raw.replace(/^\uFEFF/, '')) as RestSpot[];
 }
 
 async function writeRestSpots(spots: RestSpot[]) {
@@ -115,5 +109,10 @@ export async function saveRestSpotImage(file: File, building: string, floor: str
 }
 
 export function getRestSpotMapImage(building: string, floor: string, spots: RestSpot[]) {
-  return spots.find((spot) => spot.building === building && spot.floor === floor)?.mapImage ?? null;
+  const normalizedFloor = normalizeHospitalFloor(floor);
+  return (
+    getHospitalMapImage(building, normalizedFloor) ??
+    spots.find((spot) => spot.building === building && normalizeHospitalFloor(spot.floor) === normalizedFloor)?.mapImage ??
+    null
+  );
 }

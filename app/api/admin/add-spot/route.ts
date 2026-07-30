@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { buildSpotIdPrefix, createMapOptions, getNextSpotId, readRestSpots, saveRestSpotImage, sanitizeTags, appendRestSpot } from '@/lib/rest-spot-store';
+import { buildSpotIdPrefix, createMapOptions, getNextSpotId, getRestSpotMapImage, readRestSpots, saveRestSpotImage, sanitizeTags, appendRestSpot } from '@/lib/rest-spot-store';
 import { isAdminRequest } from '@/lib/admin-auth';
-import { RestSpot } from '@/types/chair';
+import { BackrestStatus, RestSpot, WheelchairAccessStatus } from '@/types/chair';
 
 export const runtime = 'nodejs';
 
@@ -20,6 +20,14 @@ function parseTags(value: FormDataEntryValue | null) {
   return sanitizeTags(value.split(','));
 }
 
+function parseBackrestStatus(value: FormDataEntryValue | null): BackrestStatus {
+  return value === 'yes' || value === 'no' || value === 'unknown' ? value : 'unknown';
+}
+
+function parseWheelchairAccessStatus(value: FormDataEntryValue | null): WheelchairAccessStatus {
+  return value === 'accessible' || value === 'difficult' || value === 'unknown' ? value : 'unknown';
+}
+
 export async function POST(request: Request) {
   if (!isAdminRequest(request)) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
@@ -35,8 +43,11 @@ export async function POST(request: Request) {
     const pinY = parseNumber(formData.get('pinY'));
     const seatCount = parseNumber(formData.get('seatCount'));
     const hasOutlet = parseBoolean(formData.get('hasOutlet'));
+    const hasTable = parseBoolean(formData.get('hasTable'));
     const isQuiet = parseBoolean(formData.get('isQuiet'));
     const tags = parseTags(formData.get('tags'));
+    const backrestStatus = parseBackrestStatus(formData.get('backrestStatus'));
+    const wheelchairAccessStatus = parseWheelchairAccessStatus(formData.get('wheelchairAccessStatus'));
     const file = formData.get('photo');
 
     if (!building || !floor || !areaName || !description) {
@@ -44,15 +55,15 @@ export async function POST(request: Request) {
     }
 
     if (typeof pinX !== 'number' || typeof pinY !== 'number') {
-      return NextResponse.json({ error: '핀 좌표가 필요합니다.' }, { status: 400 });
+      return NextResponse.json({ error: '좌표가 필요합니다.' }, { status: 400 });
     }
 
     if (!(file instanceof File)) {
-      return NextResponse.json({ error: '사진 파일을 선택해주세요.' }, { status: 400 });
+      return NextResponse.json({ error: '사진 파일을 선택해 주세요.' }, { status: 400 });
     }
 
     const spots = await readRestSpots();
-    const mapImage = spots.find((spot) => spot.building === building && spot.floor === floor)?.mapImage;
+    const mapImage = getRestSpotMapImage(building, floor, spots);
     if (!mapImage) {
       return NextResponse.json({ error: '선택한 건물/층의 약도 이미지를 찾지 못했습니다.' }, { status: 400 });
     }
@@ -73,14 +84,17 @@ export async function POST(request: Request) {
       photoPath,
       seatCount,
       hasOutlet,
+      hasTable,
       isQuiet,
       tags,
+      backrestStatus,
+      wheelchairAccessStatus,
     };
 
     await appendRestSpot(newSpot);
     return NextResponse.json({ spot: newSpot, prefix: buildSpotIdPrefix(building, floor), mapOptions: createMapOptions(await readRestSpots()) });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: '새 휴식공간을 저장하지 못했습니다.' }, { status: 500 });
+    return NextResponse.json({ error: '요청을 처리하지 못했습니다.' }, { status: 500 });
   }
 }

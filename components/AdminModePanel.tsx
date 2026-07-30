@@ -1,7 +1,8 @@
-'use client';
+﻿'use client';
 
 import type { FormEvent, MouseEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   AlertTriangle,
   Check,
@@ -17,7 +18,19 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
-import { RestSpot } from '@/types/chair';
+import {
+  BackrestStatus,
+  RestSpot,
+  WheelchairAccessStatus,
+  inferBackrestStatusFromTags,
+  inferTableFromTags,
+  inferWheelchairAccessStatusFromTags,
+  restSpotToChair,
+} from '@/types/chair';
+import { fetchJson } from '@/lib/fetch-json';
+import { formatHospitalFloorLabel, getPreferredHospitalMapOption, normalizeHospitalFloor } from '@/lib/hospital-maps';
+import { resolveMapImageSrc } from '@/lib/map-image';
+import MapMarker from './MapMarker';
 
 type MapOption = {
   building: string;
@@ -29,7 +42,7 @@ function formatCoord(value: number | null) {
   return typeof value === 'number' ? value.toFixed(1) : '-';
 }
 
-function calculateCoords(event: MouseEvent<HTMLButtonElement>, image: HTMLImageElement | null) {
+function calculateCoords(event: MouseEvent<HTMLElement>, image: HTMLImageElement | null) {
   if (!image) return null;
   const rect = image.getBoundingClientRect();
   if (!rect.width || !rect.height) return null;
@@ -70,7 +83,10 @@ export default function AdminModePanel() {
     description: '',
     seatCount: '',
     tags: '',
+    backrestStatus: 'unknown' as BackrestStatus,
+    wheelchairAccessStatus: 'unknown' as WheelchairAccessStatus,
     hasOutlet: false,
+    hasTable: false,
     isQuiet: false,
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -84,12 +100,19 @@ export default function AdminModePanel() {
   }, []);
 
   const currentMap = useMemo(() => {
-    if (!currentBuilding || !currentFloor) return mapOptions[0] ?? null;
-    return mapOptions.find((option) => option.building === currentBuilding && option.floor === currentFloor) ?? null;
+    if (currentBuilding && currentFloor) {
+      return mapOptions.find((option) => option.building === currentBuilding && option.floor === currentFloor) ?? getPreferredHospitalMapOption(mapOptions);
+    }
+
+    return getPreferredHospitalMapOption(mapOptions);
   }, [currentBuilding, currentFloor, mapOptions]);
 
   const currentSpots = useMemo(
-    () => spots.filter((spot) => spot.building === currentBuilding && spot.floor === currentFloor),
+    () =>
+      spots.filter(
+        (spot) =>
+          spot.building === currentBuilding && normalizeHospitalFloor(spot.floor) === normalizeHospitalFloor(currentFloor),
+      ),
     [spots, currentBuilding, currentFloor],
   );
 
@@ -106,18 +129,41 @@ export default function AdminModePanel() {
       description: selectedSpot.description,
       seatCount: selectedSpot.seatCount === null ? '' : String(selectedSpot.seatCount),
       tags: selectedSpot.tags.join(', '),
+      backrestStatus: selectedSpot.backrestStatus ?? inferBackrestStatusFromTags(selectedSpot.tags),
+      hasTable: selectedSpot.hasTable ?? inferTableFromTags(selectedSpot.tags),
+      wheelchairAccessStatus:
+        selectedSpot.wheelchairAccessStatus ?? inferWheelchairAccessStatusFromTags(selectedSpot.tags),
       hasOutlet: selectedSpot.hasOutlet,
       isQuiet: selectedSpot.isQuiet,
     });
     setPhotoFile(null);
   }, [selectedSpot]);
 
+  useEffect(() => {
+    if (!mapOptions.length) return;
+
+    const hasValidSelection =
+      currentBuilding &&
+      currentFloor &&
+      mapOptions.some((option) => option.building === currentBuilding && option.floor === currentFloor);
+
+    if (hasValidSelection) return;
+
+    const preferred = getPreferredHospitalMapOption(mapOptions);
+    if (preferred) {
+      setCurrentBuilding(preferred.building);
+      setCurrentFloor(preferred.floor);
+    }
+  }, [currentBuilding, currentFloor, mapOptions]);
+
   async function bootstrap() {
     setSessionLoading(true);
     try {
-      const sessionResponse = await fetch('/api/admin/session', { credentials: 'include' });
-      const sessionData = await sessionResponse.json();
-      if (!sessionResponse.ok || !sessionData.authenticated) {
+      const sessionData = await fetchJson<{ authenticated: boolean; expiresAt: number | null }>('/api/admin/session', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (!sessionData?.authenticated) {
         setAuthenticated(false);
         return;
       }
@@ -132,23 +178,25 @@ export default function AdminModePanel() {
   }
 
   async function loadSpots() {
-    const response = await fetch('/api/admin/spots', { credentials: 'include' });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || '관리자 데이터를 불러오지 못했습니다.');
-    }
+    const data = await fetchJson<{ spots: RestSpot[]; mapOptions: MapOption[] }>('/api/admin/spots', {
+      credentials: 'include',
+      cache: 'no-store',
+    });
 
-    const nextSpots = Array.isArray(data.spots) ? (data.spots as RestSpot[]) : [];
-    const nextOptions = Array.isArray(data.mapOptions) ? (data.mapOptions as MapOption[]) : [];
+    const nextSpots = Array.isArray(data?.spots) ? (data.spots as RestSpot[]) : [];
+    const nextOptions = Array.isArray(data?.mapOptions) ? (data.mapOptions as MapOption[]) : [];
     setSpots(nextSpots);
     setMapOptions(nextOptions);
 
-    if (!currentBuilding || !currentFloor) {
-      const first = nextOptions[0];
-      if (first) {
-        setCurrentBuilding(first.building);
-        setCurrentFloor(first.floor);
-      }
+    const preferred = getPreferredHospitalMapOption(nextOptions);
+    const hasValidSelection =
+      currentBuilding &&
+      currentFloor &&
+      nextOptions.some((option) => option.building === currentBuilding && option.floor === currentFloor);
+
+    if (!hasValidSelection && preferred) {
+      setCurrentBuilding(preferred.building);
+      setCurrentFloor(preferred.floor);
     }
   }
 
@@ -161,6 +209,9 @@ export default function AdminModePanel() {
       description: '',
       seatCount: '',
       tags: '',
+      backrestStatus: 'unknown',
+      hasTable: false,
+      wheelchairAccessStatus: 'unknown',
       hasOutlet: false,
       isQuiet: false,
     });
@@ -173,14 +224,13 @@ export default function AdminModePanel() {
     setAuthLoading(true);
     setAuthError('');
     try {
-      const response = await fetch('/api/admin/login', {
+      const data = await fetchJson<{ authenticated: boolean; expiresAt: number | null }>('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ password }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || '로그인에 실패했습니다.');
+      if (!data?.authenticated) throw new Error('로그인에 실패했습니다.');
 
       setAuthenticated(true);
       setPassword('');
@@ -194,20 +244,27 @@ export default function AdminModePanel() {
   }
 
   async function handleLogout() {
-    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
-    setAuthenticated(false);
-    setSpots([]);
-    setMapOptions([]);
-    setCurrentBuilding('');
-    setCurrentFloor('');
-    setSelectedSpotId(null);
-    setPendingPin(null);
-    setPhotoFile(null);
-    setMessage('');
-    setError('');
+    try {
+      await fetchJson<{ success?: boolean }>('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setAuthenticated(false);
+      setSpots([]);
+      setMapOptions([]);
+      setCurrentBuilding('');
+      setCurrentFloor('');
+      setSelectedSpotId(null);
+      setPendingPin(null);
+      setPhotoFile(null);
+      setMessage('로그아웃했습니다.');
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '로그아웃에 실패했습니다.');
+    }
   }
 
-  function handleMapClick(event: MouseEvent<HTMLButtonElement>) {
+  function handleMapClick(event: MouseEvent<HTMLElement>) {
     const coords = calculateCoords(event, imgRef.current);
     if (!coords) return;
 
@@ -237,18 +294,22 @@ export default function AdminModePanel() {
       body.set('description', form.description.trim());
       body.set('seatCount', form.seatCount.trim());
       body.set('tags', form.tags.trim());
+      body.set('backrestStatus', form.backrestStatus);
+      body.set('hasTable', String(form.hasTable));
+      body.set('wheelchairAccessStatus', form.wheelchairAccessStatus);
       body.set('hasOutlet', String(form.hasOutlet));
       body.set('isQuiet', String(form.isQuiet));
       if (photoFile) body.set('photo', photoFile);
 
       const endpoint = selectedSpotId ? `/api/admin/spots/${selectedSpotId}` : '/api/admin/add-spot';
-      const response = await fetch(endpoint, {
+      const data = await fetchJson<{ spot?: RestSpot }>(endpoint, {
         method: selectedSpotId ? 'PUT' : 'POST',
         credentials: 'include',
         body,
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || '저장에 실패했습니다.');
+      if (!data?.spot) {
+        throw new Error('저장에 실패했습니다.');
+      }
 
       await loadSpots();
       if (data.spot?.id) {
@@ -272,12 +333,11 @@ export default function AdminModePanel() {
     setError('');
     setMessage('');
     try {
-      const response = await fetch(`/api/admin/spots/${selectedSpotId}`, {
+      const data = await fetchJson<{ deleted?: boolean; success?: boolean }>(`/api/admin/spots/${selectedSpotId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || '삭제에 실패했습니다.');
+      if (!data?.deleted && !(data as { success?: boolean } | null)?.success) throw new Error('삭제에 실패했습니다.');
 
       resetEditor();
       await loadSpots();
@@ -304,6 +364,13 @@ export default function AdminModePanel() {
       <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f0f7ff,_#f7fbfd_40%,_#eef4f7_100%)] px-4 py-10 text-[#18324a]">
         <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_420px] lg:items-center">
           <section className="space-y-5">
+            <Link
+              href="/"
+              aria-label="숨은 의자 찾기 타이틀 화면으로 이동"
+              className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#1668c7]"
+            >
+              ← 숨은 의자 찾기로 돌아가기
+            </Link>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs font-bold tracking-[0.18em] text-[#0d9c9a] shadow-sm">
               <Lock size={14} />
               ADMIN MODE
@@ -363,10 +430,6 @@ export default function AdminModePanel() {
                 {authError}
               </div>
             )}
-
-            <p className="mt-4 text-xs leading-6 text-slate-500">
-              운영 환경에서는 `ADMIN_PASSWORD_HASH`와 `ADMIN_SESSION_SECRET`를 설정해 주세요. 해시가 없으면 개발용 기본 비밀번호를 사용할 수 있습니다.
-            </p>
           </form>
         </div>
       </main>
@@ -429,7 +492,10 @@ export default function AdminModePanel() {
                   onChange={(event) => {
                     const nextBuilding = event.target.value;
                     setCurrentBuilding(nextBuilding);
-                    const nextFloor = mapOptions.find((option) => option.building === nextBuilding)?.floor || '';
+                    const nextFloor =
+                      mapOptions.find((option) => option.building === nextBuilding && normalizeHospitalFloor(option.floor) === '1층')?.floor ||
+                      mapOptions.find((option) => option.building === nextBuilding)?.floor ||
+                      '';
                     setCurrentFloor(nextFloor);
                     resetEditor();
                   }}
@@ -456,7 +522,7 @@ export default function AdminModePanel() {
                     .filter((option) => option.building === currentBuilding)
                     .map((option) => (
                       <option key={`${option.building}-${option.floor}`} value={option.floor}>
-                        {option.floor}
+                        {formatHospitalFloorLabel(option.floor)}
                       </option>
                     ))}
                 </select>
@@ -465,38 +531,35 @@ export default function AdminModePanel() {
 
             <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-3">
               {currentMap ? (
-                <button
-                  type="button"
+                <div
                   onClick={handleMapClick}
                   className="group relative block w-full overflow-hidden rounded-[24px] bg-white text-left"
                 >
                   <img
                     ref={imgRef}
-                    src={currentMap.mapImage}
+                    src={resolveMapImageSrc(currentMap.mapImage)}
                     alt={`${currentMap.building} ${currentMap.floor} map`}
                     className="block h-auto w-full select-none"
                     draggable={false}
                   />
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(13,156,154,0.08),transparent_55%)]" />
 
-                  {currentSpots.map((spot) => {
-                    const isSelected = spot.id === selectedSpotId;
-                    return (
-                      <button
-                        key={spot.id}
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setSelectedSpotId(spot.id);
-                        }}
-                        className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white shadow-lg transition ${
-                          isSelected ? 'z-30 animate-pulse bg-[#1668c7]' : 'z-20 bg-[#0d9c9a]'
-                        }`}
-                        style={{ left: `${spot.pin.x}%`, top: `${spot.pin.y}%`, width: isSelected ? 22 : 18, height: isSelected ? 22 : 18 }}
-                        aria-label={spot.areaName}
-                      />
-                    );
-                  })}
+                  <div className="absolute inset-0">
+                    {currentSpots.map((spot) => {
+                      const isSelected = spot.id === selectedSpotId;
+                      const chair = restSpotToChair(spot);
+                      return (
+                        <MapMarker
+                          key={spot.id}
+                          chair={chair}
+                          x={spot.pin.x}
+                          y={spot.pin.y}
+                          selected={isSelected}
+                          onActivate={() => setSelectedSpotId(spot.id)}
+                        />
+                      );
+                    })}
+                  </div>
 
                   {pendingPin && (
                     <span
@@ -505,14 +568,7 @@ export default function AdminModePanel() {
                     />
                   )}
 
-                  <div className="absolute bottom-4 left-4 rounded-2xl bg-slate-900/80 px-4 py-3 text-sm text-white backdrop-blur">
-                    <div className="flex items-center gap-2 font-bold">
-                      <MapPin size={16} />
-                      {currentMap.building} {currentMap.floor}
-                    </div>
-                    <p className="mt-1 text-xs text-slate-200">지도를 클릭하면 새 좌표가 계산됩니다.</p>
-                  </div>
-                </button>
+                </div>
               ) : (
                 <div className="grid min-h-[420px] place-items-center rounded-[24px] border border-dashed border-slate-300 bg-white text-center text-slate-500">
                   <div>
@@ -527,7 +583,7 @@ export default function AdminModePanel() {
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               <InfoCard title="현재 좌표" value={pendingPin ? `${formatCoord(pendingPin.x)}%, ${formatCoord(pendingPin.y)}%` : '아직 없음'} />
               <InfoCard title="등록된 spot" value={`${currentSpots.length}개`} />
-              <InfoCard title="선택 위치" value={currentMap ? `${currentMap.building} ${currentMap.floor}` : '-'} />
+              <InfoCard title="선택 위치" value={currentMap ? `${currentMap.building} ${formatHospitalFloorLabel(currentMap.floor)}` : '-'} />
             </div>
           </div>
 
@@ -620,6 +676,40 @@ export default function AdminModePanel() {
                   </label>
                 </div>
 
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label>
+                    <span className="mb-2 block text-sm font-bold text-slate-600">등받이</span>
+                    <select
+                      value={form.backrestStatus}
+                      onChange={(event) =>
+                        setForm((current) => ({ ...current, backrestStatus: event.target.value as BackrestStatus }))
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-[#1668c7]"
+                    >
+                      <option value="unknown">모름</option>
+                      <option value="yes">있음</option>
+                      <option value="no">없음</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span className="mb-2 block text-sm font-bold text-slate-600">휠체어 주차 가능</span>
+                    <select
+                      value={form.wheelchairAccessStatus}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          wheelchairAccessStatus: event.target.value as WheelchairAccessStatus,
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-[#1668c7]"
+                    >
+                      <option value="unknown">모름</option>
+                      <option value="accessible">가능</option>
+                      <option value="difficult">어려움</option>
+                    </select>
+                  </label>
+                </div>
+
                 <div className="flex flex-wrap gap-3">
                   <label className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
                     <input
@@ -628,6 +718,14 @@ export default function AdminModePanel() {
                       onChange={(event) => setForm((current) => ({ ...current, hasOutlet: event.target.checked }))}
                     />
                     콘센트 있음
+                  </label>
+                  <label className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={form.hasTable}
+                      onChange={(event) => setForm((current) => ({ ...current, hasTable: event.target.checked }))}
+                    />
+                    테이블 있음
                   </label>
                   <label className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
                     <input
@@ -670,7 +768,7 @@ export default function AdminModePanel() {
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <strong className="block text-lg">현재 층의 spot</strong>
-                  <span className="text-sm text-slate-500">{currentMap ? `${currentMap.building} ${currentMap.floor}` : '선택된 층 없음'}</span>
+                  <span className="text-sm text-slate-500">{currentMap ? `${currentMap.building} ${formatHospitalFloorLabel(currentMap.floor)}` : '선택된 층 없음'}</span>
                 </div>
                 <span className="rounded-full bg-[#e8f4ff] px-3 py-1 text-xs font-bold text-[#1668c7]">{currentSpots.length}개</span>
               </div>
