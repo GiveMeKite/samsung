@@ -52,7 +52,44 @@ function createId() {
 }
 
 function placeToChairPlace(place: ChatPlace, chairs: Chair[]) {
-  return chairs.find((item) => item.id === place.id) ?? null;
+  const byId = chairs.find((item) => item.id === place.id);
+  if (byId) return byId;
+
+  const placeName = place.name.trim().toLowerCase();
+  const placeBuilding = place.building.trim().toLowerCase();
+  const placeFloor = place.floor.trim().toLowerCase();
+
+  return (
+    chairs.find((item) => {
+      const sameBuilding = item.building.trim().toLowerCase() === placeBuilding;
+      const sameFloor = item.floor.trim().toLowerCase() === placeFloor;
+      const sameName = item.name.trim().toLowerCase().includes(placeName.slice(0, 6));
+      return sameBuilding && sameFloor && sameName;
+    }) ?? null
+  );
+}
+
+function placeToSyntheticChair(place: ChatPlace): Chair {
+  return {
+    id: place.id,
+    building: place.building,
+    floor: place.floor,
+    name: place.name,
+    location: `${place.building} ${place.floor}`,
+    description: place.description,
+    seatCount: place.seatCount ?? 0,
+    hasBackrest: Boolean(place.backrestAvailable),
+    hasOutlet: Boolean(place.outletAvailable),
+    hasTable: Boolean(place.tableAvailable),
+    hasWheelchairParking: Boolean(place.wheelchairParkingAvailable),
+    wheelchairAccessible: Boolean(place.wheelchairAccessible),
+    isQuiet: Boolean(place.quiet),
+    image: '',
+    x: place.x ?? 0,
+    y: place.y ?? 0,
+    backrestStatus: place.backrestAvailable ? 'yes' : 'unknown',
+    wheelchairAccessStatus: place.wheelchairAccessible ? 'accessible' : 'unknown',
+  };
 }
 
 export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; onOpenMap: (chair: Chair) => void }) {
@@ -62,7 +99,7 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
     {
       id: 'welcome',
       role: 'bot',
-      text: '원하시는 조건을 말씀해 주세요. 건물, 층, 편의 정보까지 함께 안내해드릴게요.',
+      text: '찾고 싶은 조건을 말씀해 주세요. 건물, 층, 콘센트 같은 기준으로 찾아드릴게요.',
       matchedSpotIds: [],
       found: false,
       places: [],
@@ -74,27 +111,14 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
     if (!question.trim() || loading) return;
 
     const value = question.trim();
-    const userMessage: ChatMessage = {
-      id: createId(),
-      role: 'user',
-      text: value,
-    };
     const pendingId = createId();
 
     setQuestion('');
     setLoading(true);
     setMessages((prev) => [
       ...prev,
-      userMessage,
-      {
-        id: pendingId,
-        role: 'bot',
-        text: '찾고 있어요...',
-        matchedSpotIds: [],
-        found: false,
-        places: [],
-        pending: true,
-      },
+      { id: createId(), role: 'user', text: value },
+      { id: pendingId, role: 'bot', text: '찾고 있어요...', matchedSpotIds: [], found: false, places: [], pending: true },
     ]);
 
     try {
@@ -104,9 +128,7 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
         body: JSON.stringify({ question: value }),
       });
 
-      if (!data) {
-        throw new Error('챗봇 응답을 받지 못했어요.');
-      }
+      if (!data) throw new Error('응답을 받지 못했습니다.');
 
       setMessages((prev) =>
         prev.map((message) =>
@@ -129,7 +151,7 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
             ? {
                 id: pendingId,
                 role: 'bot',
-                text: error instanceof Error ? error.message : '챗봇 연결 중 문제가 생겼어요.',
+                text: error instanceof Error ? error.message : '요청 처리 중 문제가 생겼어요.',
                 matchedSpotIds: [],
                 found: false,
                 places: [],
@@ -151,7 +173,7 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
         </span>
         <div>
           <strong className="block text-sm font-extrabold">휴식공간 챗봇</strong>
-          <span className="text-xs text-slate-300">등록된 데이터 기준으로만 안내합니다.</span>
+          <span className="text-xs text-slate-300">등록된 데이터 기준으로 안내합니다.</span>
         </div>
       </div>
 
@@ -186,10 +208,30 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
                 </span>
               </div>
 
+              {!message.pending && message.found && resultPlaces.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {resultPlaces.slice(0, 3).map((place) => {
+                    const chair = placeToChairPlace(place, chairs);
+                    const fallbackChair = chair ?? (place.x !== null && place.y !== null ? placeToSyntheticChair(place) : null);
+                    return fallbackChair ? (
+                      <button
+                        key={place.id}
+                        type="button"
+                        onClick={() => onOpenMap(fallbackChair)}
+                        className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-[#1668c7] transition hover:bg-blue-100"
+                      >
+                        지도에서 보기: {place.name}
+                      </button>
+                    ) : null;
+                  })}
+                </div>
+              ) : null}
+
               {!message.pending && message.found && resultPlaces.length > 0 && (
                 <div className="space-y-3">
                   {resultPlaces.map((place) => {
                     const chair = placeToChairPlace(place, chairs);
+                    const fallbackChair = chair ?? (place.x !== null && place.y !== null ? placeToSyntheticChair(place) : null);
                     const previewFacts = place.facts.slice(0, 3);
 
                     return (
@@ -210,13 +252,13 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
                             ) : null}
                           </div>
 
-                          {chair ? (
+                          {chair || fallbackChair ? (
                             <button
                               type="button"
-                              onClick={() => onOpenMap(chair)}
+                              onClick={() => onOpenMap(chair ?? fallbackChair!)}
                               className="shrink-0 rounded-full bg-[#1668c7] px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#1457a5]"
                             >
-                              지도에서 보기
+                              지도로 보기
                             </button>
                           ) : null}
                         </div>
@@ -238,28 +280,6 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
                   })}
                 </div>
               )}
-
-              {!message.pending && message.found && resultPlaces.length === 0 && message.matchedSpotIds.length > 0 && (
-                <div className="space-y-2">
-                  {message.matchedSpotIds.map((id) => {
-                    const chair = chairs.find((item) => item.id === id);
-                    return chair ? (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => onOpenMap(chair)}
-                        className="flex w-full items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-left text-xs font-bold text-blue-900"
-                      >
-                        <MapPin size={16} className="shrink-0 text-[#1668c7]" />
-                        <span>
-                          {chair.building} {chair.floor} · {chair.name}
-                          <small className="mt-1 block font-normal text-blue-700">지도로 위치 보기</small>
-                        </span>
-                      </button>
-                    ) : null;
-                  })}
-                </div>
-              )}
             </div>
           );
         })}
@@ -269,7 +289,7 @@ export default function RestChatbot({ chairs, onOpenMap }: { chairs: Chair[]; on
         <input
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="예: 본관 1층에서 콘센트 있는 곳"
+          placeholder="예: 본관 1층에 콘센트 있는 곳"
           className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
           aria-label="휴식공간 질문"
         />

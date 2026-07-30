@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:3002": "npm run build && set PORT=3002 && next start",
     "lint": "next lint"
   },
   "dependencies": {

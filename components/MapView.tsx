@@ -78,12 +78,6 @@ export default function MapView({
     });
   }, [chairs, activeFilters, normalizedBuilding, normalizedFloor]);
 
-  useEffect(() => {
-    if (selected && !visibleChairs.some((chair) => chair.id === selected.id)) {
-      onSelect(null);
-    }
-  }, [onSelect, selected, visibleChairs]);
-
   const hasMapImage = Boolean(mapSrc) && !mapLoadFailed;
   const showPlaceholder = !mapSrc || mapLoadFailed;
   const mapErrorText =
